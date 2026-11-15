@@ -14,6 +14,8 @@ class Store:
         self._tables: dict[str, list[dict[str, Any]]] = {
             name: [dict(row) for row in rows] for name, rows in SEED_ROWS.items()
         }
+        # 执行产物（批次、结果集）单独存放，不计入业务模块清单与运营概览。
+        self._registries: dict[str, list[dict[str, Any]]] = {}
 
     def module_names(self) -> list[str]:
         return sorted(self._tables)
@@ -24,6 +26,16 @@ class Store:
     def find(self, module: str, entry_id: int) -> dict[str, Any] | None:
         for row in self.rows(module):
             if int(row.get("id", 0)) == entry_id:
+                return row
+        return None
+
+    def registry(self, name: str) -> list[dict[str, Any]]:
+        """读取执行产物表；批次与结果集按执行顺序追加，不做状态覆盖。"""
+        return self._registries.setdefault(name, [])
+
+    def find_in_registry(self, name: str, key: str, value: Any) -> dict[str, Any] | None:
+        for row in self.registry(name):
+            if row.get(key) == value:
                 return row
         return None
 

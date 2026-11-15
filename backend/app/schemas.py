@@ -28,6 +28,14 @@ class EntryPayload(BaseModel):
     remark: str | None = None
 
 
+class BatchPayload(BaseModel):
+    """批量执行筛选模板：一次提交多条模板，按同一目标数据源冻结口径。"""
+
+    templates: list[str] = Field(default_factory=list, description="模板编号列表，支持多选后一次提交")
+    target_source: str | None = Field(default=None, description="目标数据源；为空时取模板自身的目标数据源")
+    stop_after: str | None = Field(default=None, description="调试用：执行到该模板后中断，便于验证断点续跑")
+
+
 
 class ProductEntry(BaseModel):
     """数据产品明细结构。"""
